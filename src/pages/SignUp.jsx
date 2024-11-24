@@ -8,6 +8,7 @@ export const SignUp = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const navigate = useNavigate()
 
@@ -19,15 +20,24 @@ export const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const result = await firebase.signUpUser(email, password)
+    const result = await firebase.signUpUser(email, password, name)
     console.log("Signed Up", result)
     setEmail("")
     setPassword("")
+    setName("")
   }
 
   return (
-    <div className="flex flex-col w-[300px] p-4">
-      <form onSubmit={handleSubmit}>
+    <div className="w-[300px] p-4">
+      <form className="flex flex-col" onSubmit={handleSubmit}>
+        <label htmlFor="name">Name:</label>
+        <input
+          onChange={(e) => setName(e.target.value)}
+          value={name}
+          className="border border-gray-400 mb-5"
+          type="text"
+          id="name"
+        />
         <label htmlFor="email">Email</label>
         <input
           onChange={(e) => setEmail(e.target.value)}

@@ -6,20 +6,20 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import axios from "axios";
 
-
 const FirebaseContext = createContext(null);
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBEuWH5qvE-LFNLWMvRgM2HdpjXpDAe6MA",
-  authDomain: "bookstore-7edd0.firebaseapp.com",
-  projectId: "bookstore-7edd0",
-  storageBucket: "bookstore-7edd0.firebasestorage.app",
-  messagingSenderId: "824895536626",
-  appId: "1:824895536626:web:d1c58a0589affdab1cff6b",
+  apiKey: import.meta.env.VITE_FIRE_API_KEY ,
+  authDomain: import.meta.env.VITE_FIRE_AUTHDOMAIN,
+  projectId: import.meta.env.VITE_PROJECTID,
+  storageBucket: import.meta.env.VITE_STORAGEBUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSSENDERID,
+  appId: import.meta.env.VITE_APPID,
 };
 
 export const useFirebase = () => useContext(FirebaseContext);
@@ -40,8 +40,22 @@ export const FirebaseProvider = (props) => {
     });
   }, []);
 
-  const signUpUser = (email, password) => {
-    return createUserWithEmailAndPassword(firebaseAuth, email, password);
+  const signUpUser = (email, password, name) => {
+    createUserWithEmailAndPassword(firebaseAuth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+
+        updateProfile(user, {
+          displayName: name,
+        })
+          // .then(() => {
+          //   console.log("user profile updated:", user);
+          // })
+          // .catch((e) => console.log(e));
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   const signInUser = (email, password) => {
@@ -73,7 +87,7 @@ export const FirebaseProvider = (props) => {
       );
 
       if (response.data.secure_url) {
-        const imageUrl = response.data.secure_url; 
+        const imageUrl = response.data.secure_url;
 
         await addDoc(collection(fireStore, "books"), {
           name,
