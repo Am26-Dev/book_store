@@ -71,45 +71,85 @@ export const FirebaseProvider = (props) => {
 
   console.log(user);
 
-  const createNewListing = async (name, isbn, price, coverPic) => {
-    if (!coverPic) return;
 
-    // Create a FormData object to hold the file data
-    const formData = new FormData();
-    formData.append("file", coverPic);
-    formData.append("upload_preset", "unsigned_presetba"); // cloudinary upload preset
+  //---------this is for uploading one image only======
+  // const createNewListing = async (name, isbn, price, coverPic) => {
+  //   if (!coverPic) return;
+
+  //   // Create a FormData object to hold the file data
+  //   const formData = new FormData();
+  //   formData.append("file", coverPic);
+  //   formData.append("upload_preset", `${import.meta.env.VITE_CLOUD_PRESET}`); // cloudinary upload preset
+
+  //   try {
+  //     // Upload to Cloudinary using Axios
+  //     const response = await axios.post(
+  //       `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`,
+  //       formData
+  //     );
+
+  //     if (response.data.secure_url) {
+  //       const imageUrl = response.data.secure_url;
+
+  //       await addDoc(collection(fireStore, "books"), {
+  //         name,
+  //         isbn,
+  //         price,
+  //         coverPic: imageUrl,
+  //         userId: user.uid,
+  //         userEmail: user.email,
+  //         displayName: user.displayName || "no name provided",
+  //       });
+  //       return { success: true, message: "Listing created successfully!" };
+  //       // toast.success("Listed the book successfully")
+  //       // console.log("Listing created successfully");
+  //     } else {
+  //       return { success: false, message: "Image upload failed." };
+  //       // console.error("Image upload failed:", response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error uploading image:", error);
+  //     return { success: false, message: "Error uploading image." };
+  //   }
+  // };
+
+
+  const createNewListing = async (name, isbn, price, mediaFiles) => {
+// this function is for allowing user to upload multiple media , images or videos , max 7
+    if (!mediaFiles || mediaFiles.length === 0) return { success: false, message: "No media files selected." };
 
     try {
-      // Upload to Cloudinary using Axios
-      const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/ddh2tu58p/image/upload`,
-        formData
-      );
+      
+        const uploadPromises = mediaFiles.map(async (file) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', `${import.meta.env.VITE_CLOUD_PRESET}`); 
 
-      if (response.data.secure_url) {
-        const imageUrl = response.data.secure_url;
+            const response = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/upload`, formData);
 
-        await addDoc(collection(fireStore, "books"), {
-          name,
-          isbn,
-          price,
-          coverPic: imageUrl,
-          userId: user.uid,
-          userEmail: user.email,
-          displayName: user.displayName || "no name provided",
+            return response.data.secure_url;
         });
+
+   
+        const imageUrls  = await Promise.all(uploadPromises);
+
+        
+        await addDoc(collection(fireStore, "books"), {
+            name,
+            isbn,
+            price,
+            mediaFiles: imageUrls, // storing an array of image URLs
+            userId: user.uid,
+            userEmail: user.email,
+            displayName: user.displayName || "no name provided",
+        });
+
         return { success: true, message: "Listing created successfully!" };
-        // toast.success("Listed the book successfully")
-        // console.log("Listing created successfully");
-      } else {
-        return { success: false, message: "Image upload failed." };
-        // console.error("Image upload failed:", response.data);
-      }
     } catch (error) {
-      console.error("Error uploading image:", error);
-      return { success: false, message: "Error uploading image." };
+        console.error("Error uploading media:", error);
+        return { success: false, message: "Error uploading media." };
     }
-  };
+};
 
   return (
     <FirebaseContext.Provider
