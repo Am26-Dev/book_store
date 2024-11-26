@@ -8,13 +8,13 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 import axios from "axios";
 
 const FirebaseContext = createContext(null);
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIRE_API_KEY ,
+  apiKey: import.meta.env.VITE_FIRE_API_KEY,
   authDomain: import.meta.env.VITE_FIRE_AUTHDOMAIN,
   projectId: import.meta.env.VITE_PROJECTID,
   storageBucket: import.meta.env.VITE_STORAGEBUCKET,
@@ -47,11 +47,11 @@ export const FirebaseProvider = (props) => {
 
         updateProfile(user, {
           displayName: name,
-        })
-          // .then(() => {
-          //   console.log("user profile updated:", user);
-          // })
-          // .catch((e) => console.log(e));
+        });
+        // .then(() => {
+        //   console.log("user profile updated:", user);
+        // })
+        // .catch((e) => console.log(e));
       })
       .catch((e) => {
         console.log(e);
@@ -62,7 +62,6 @@ export const FirebaseProvider = (props) => {
     return signInWithEmailAndPassword(firebaseAuth, email, password);
   };
 
-  const isLoggedIn = user ? true : false;
 
   const signOutUser = async () => {
     const res = await signOut(firebaseAuth);
@@ -70,7 +69,6 @@ export const FirebaseProvider = (props) => {
   };
 
   console.log(user);
-
 
   //---------this is for uploading one image only======
   // const createNewListing = async (name, isbn, price, coverPic) => {
@@ -113,43 +111,54 @@ export const FirebaseProvider = (props) => {
   //   }
   // };
 
-
   const createNewListing = async (name, isbn, price, mediaFiles) => {
-// this function is for allowing user to upload multiple media , images or videos , max 7
-    if (!mediaFiles || mediaFiles.length === 0) return { success: false, message: "No media files selected." };
+    // this function is for allowing user to upload multiple media , images or videos , max 7
+    if (!mediaFiles || mediaFiles.length === 0)
+      return { success: false, message: "No media files selected." };
 
     try {
-      
-        const uploadPromises = mediaFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', `${import.meta.env.VITE_CLOUD_PRESET}`); 
+      const uploadPromises = mediaFiles.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append(
+          "upload_preset",
+          `${import.meta.env.VITE_CLOUD_PRESET}`
+        );
 
-            const response = await axios.post(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/upload`, formData);
+        const response = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUD_NAME
+          }/upload`,
+          formData
+        );
 
-            return response.data.secure_url;
-        });
+        return response.data.secure_url;
+      });
 
-   
-        const imageUrls  = await Promise.all(uploadPromises);
+      const imageUrls = await Promise.all(uploadPromises);
 
-        
-        await addDoc(collection(fireStore, "books"), {
-            name,
-            isbn,
-            price,
-            mediaFiles: imageUrls, // storing an array of image URLs
-            userId: user.uid,
-            userEmail: user.email,
-            displayName: user.displayName || "no name provided",
-        });
+      await addDoc(collection(fireStore, "books"), {
+        name,
+        isbn,
+        price,
+        mediaFiles: imageUrls, // storing an array of image URLs
+        userId: user.uid,
+        userEmail: user.email,
+        displayName: user.displayName || "no name provided",
+      });
 
-        return { success: true, message: "Listing created successfully!" };
+      return { success: true, message: "Listing created successfully!" };
     } catch (error) {
-        console.error("Error uploading media:", error);
-        return { success: false, message: "Error uploading media." };
+      console.error("Error uploading media:", error);
+      return { success: false, message: "Error uploading media." };
     }
-};
+  };
+
+  const listAllBooks = async  () => {
+    return getDocs(collection(fireStore, "books"))
+  }
+  
+  const isLoggedIn = user ? true : false;
 
   return (
     <FirebaseContext.Provider
@@ -159,6 +168,7 @@ export const FirebaseProvider = (props) => {
         isLoggedIn,
         signOutUser,
         createNewListing,
+        listAllBooks,
       }}
     >
       {props.children}

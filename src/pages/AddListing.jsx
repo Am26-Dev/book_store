@@ -49,7 +49,7 @@ export const AddListing = () => {
             <input
                 onChange={(e) => setName(e.target.value)}
                 value={name}
-                className="border border-gray-400 mb-5"
+                className="border border-gray-400 mb-5 p-2"
                 type="text"
                 id="name"
                 placeholder="Book Name"
@@ -58,7 +58,7 @@ export const AddListing = () => {
             <input
                 onChange={(e) => setIsbn(e.target.value)}
                 value={isbn}
-                className="border border-gray-400 mb-5"
+                className="border border-gray-400 mb-5 p-2"
                 type="text"
                 id="isbn"
                 placeholder="ISBN Number"
@@ -67,7 +67,7 @@ export const AddListing = () => {
             <input
                 onChange={(e) => setPrice(e.target.value)}
                 value={price}
-                className="border border-gray-400 mb-5"
+                className="border border-gray-400 mb-5 p-2"
                 type="number"
                 id="price"
                 placeholder="Price"
