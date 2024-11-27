@@ -7,7 +7,7 @@ export const Navbar = () => {
   const firebase = useFirebase()
 
   return (
-    <div>
+    <div className='mb-5'>
       <div className='border border-b-2 p-4 flex justify-evenly'>
         <ul className='flex gap-5 text-xl font-semibold'>
         <Link to="/">

@@ -8,7 +8,14 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import axios from "axios";
 
 const FirebaseContext = createContext(null);
@@ -61,7 +68,6 @@ export const FirebaseProvider = (props) => {
   const signInUser = (email, password) => {
     return signInWithEmailAndPassword(firebaseAuth, email, password);
   };
-
 
   const signOutUser = async () => {
     const res = await signOut(firebaseAuth);
@@ -154,10 +160,27 @@ export const FirebaseProvider = (props) => {
     }
   };
 
-  const listAllBooks = async  () => {
-    return getDocs(collection(fireStore, "books"))
-  }
-  
+  const listAllBooks = async () => {
+    return getDocs(collection(fireStore, "books"));
+  };
+
+  const getBookById = async (id) => {
+    const docRef = doc(fireStore, "books", id);
+    const result = await getDoc(docRef);
+    return result;
+  };
+
+  const placeOrder = async (bookId, qty) => {
+    const collectionRef = collection(fireStore, "books", bookId, "orders");
+    await addDoc(collectionRef, {
+      username: user.displayName,
+      userId: user.uid,
+      userEmail: user.email,
+      qty: Number(qty),
+    });
+    return  { success: true, message: "Order placed successfully!" };
+  };
+
   const isLoggedIn = user ? true : false;
 
   return (
@@ -169,6 +192,8 @@ export const FirebaseProvider = (props) => {
         signOutUser,
         createNewListing,
         listAllBooks,
+        getBookById,
+        placeOrder,
       }}
     >
       {props.children}

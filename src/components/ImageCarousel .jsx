@@ -16,7 +16,7 @@ export const ImageCarousel = ({ images }) => {
   };
 
   return (
-    <div className="relative w-full h-40 overflow-hidden">
+    <div className="relative w-full h-60 overflow-hidden">
       <div
         className="w-full h-full flex transition-transform duration-500"
         style={{ transform: `translateX(-${currIndex * 100}%)` }}
@@ -26,7 +26,7 @@ export const ImageCarousel = ({ images }) => {
             key={i}
             src={url}
             alt={`Slide ${i + 1}`}
-            className="w-full h-40 object-cover flex-shrink-0"
+            className="w-full h-full object-cover flex-shrink-0"
           />
         ))}
       </div>
@@ -36,13 +36,13 @@ export const ImageCarousel = ({ images }) => {
         <>
           <button
             onClick={handlePrev}
-            className="absolute top-1/2 -left-3 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800"
+            className="absolute top-1/2 -left-1 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800"
           >
             &lt;
           </button>
           <button
             onClick={handleNext}
-            className="absolute top-1/2 -right-3 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800"
+            className="absolute top-1/2 -right-1 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-800"
           >
             &gt;
           </button>
