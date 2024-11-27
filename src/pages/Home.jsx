@@ -1,41 +1,50 @@
 import React, { useEffect, useState } from "react";
 import { useFirebase } from "../context/Firebase";
+import { BookCard } from "./BookCard";
 
 export const Home = () => {
   const firebase = useFirebase();
-  const [book, setBook] = useState([]);
+  const [books, setBooks] = useState([]);
+  // const [bookData, setBookdata] = useState([]);
 
   useEffect(() => {
-    firebase.listAllBooks().then((books) => setBook(books.docs[0].data()));
-    console.log(book);
-  }, [firebase]);
+    firebase.listAllBooks().then((querySnapShot) => {
+      const bookData = querySnapShot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBooks(bookData);
+      // console.log(querySnapShot)
+    });
+  }, []);
 
   return (
-    <div className="flex flex-col p-5">
-      <p>All listed books</p>
-      <p>
-        BOOK NAME:<span className="text-2xl text-purple-600">{book.name}</span>
-      </p>
-      <p>
-        ISBN NUMBER:{" "}
-        <span className="text-2xl text-purple-600">{book.isbn}</span>
-      </p>
-      <p>
-        PRICE: <span className="text-2xl text-purple-600">{book.price}</span>
-      </p>
-      <p>
-        LISTED BY:{" "}
-        <span className="text-2xl text-purple-600">{book.displayName}</span>
-      </p>
-      {book.mediaFiles && book.mediaFiles.length > 0 ? (
-        book.mediaFiles.map((url, index) => (
-          <div key={index}>
-            <img src={url} alt="" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+      {books.map((book, index) => (
+        <div
+          key={index}
+          className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-300"
+        >
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Book Name: {book.name}
+            </h2>
+            <p className="text-sm text-gray-600">
+              Listed By: {book.displayName}
+            </p>
           </div>
-        ))
-      ) : (
-        <p>No media files available.</p>
-      )}
+          {book.mediaFiles &&
+            book.mediaFiles.map((url, i) => (
+              <div key={i} className="relative w-full">
+                <img
+                  src={url}
+                  alt="Media"
+                  className="w-full h-40 object-cover border-t border-gray-200"
+                />
+              </div>
+            ))}
+        </div>
+      ))}
     </div>
   );
 };
